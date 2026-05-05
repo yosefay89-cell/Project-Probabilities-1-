@@ -1,0 +1,45 @@
+using System;
+using System.Linq;
+
+class OutlierProgram
+{
+    static void Main()
+    {
+        double[] data = {
+            115, 182, 191, 31, 196, 1099, 5, 172, 10, 179,
+            83, 21, 20, 21, 186, 177, 195, 193, 188, 199,
+            62, 109, 105, 183, 110
+        };
+
+        Array.Sort(data);
+
+        double q1 = GetPercentile(data, 25);
+        double q3 = GetPercentile(data, 75);
+        double iqr = q3 - q1;
+
+        double lowerBound = q1 - 1.5 * iqr;
+        double upperBound = q3 + 1.5 * iqr;
+
+        Console.WriteLine("Outliers are:");
+
+        foreach (var x in data)
+        {
+            if (x < lowerBound || x > upperBound)
+            {
+                Console.WriteLine(x);
+            }
+        }
+    }
+
+    static double GetPercentile(double[] sortedData, double percentile)
+    {
+        double position = (sortedData.Length + 1) * percentile / 100.0;
+        int index = (int)position;
+        double fraction = position - index;
+
+        if (index <= 0) return sortedData[0];
+        if (index >= sortedData.Length) return sortedData[sortedData.Length - 1];
+
+        return sortedData[index - 1] + fraction * (sortedData[index] - sortedData[index - 1]);
+    }
+}
