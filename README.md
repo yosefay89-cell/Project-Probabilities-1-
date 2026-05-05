@@ -1,81 +1,168 @@
-using System;
-using System.Linq;
-using System.Collections.Generic;
+# 📊 Probability & Statistical Distributions — Programming Assignment
 
-class Program
-{
-    static void Main()
-    {
-        double[] data = {
-            115, 182, 191, 31, 196, 1099, 5, 172, 10, 179,
-            83, 21, 20, 21, 186, 177, 195, 193, 188, 199,
-            62, 109, 105, 183, 110
-        };
+> **Faculty of Computers and Information**
+> Software Engineering B.Sc.
 
-        Array.Sort(data);
-        int n = data.Length;
+---
 
-        // Mean
-        double mean = data.Average();
+## 📁 Project Structure
 
-        // Mode
-        var groups = data.GroupBy(v => v)
-                         .OrderByDescending(g => g.Count())
-                         .First();
-        double mode = groups.Key;
+```
+StatisticsAssignment/
+│
+├── Program1_Statistics.cs        # Part 1 — Statistical Measures
+├── Program2_OutlierDetection.cs  # Part 2 — Outlier Detection
+└── README.md                     # Project Documentation
+```
 
-        // Median
-        double median = GetPercentile(data, 50);
+---
 
-        // Variance
-        double variance = data.Select(x => Math.Pow(x - mean, 2)).Average();
+## 📌 Dataset
 
-        // Standard Deviation
-        double stdDev = Math.Sqrt(variance);
+The following 25 values are used in both programs:
 
-        // Percentiles
-        double p20 = GetPercentile(data, 20);
-        double p50 = GetPercentile(data, 50);
+```
+115, 182, 191, 31, 196, 1099, 5, 172, 10, 179,
+83, 21, 20, 21, 186, 177, 195, 193, 188, 199,
+62, 109, 105, 183, 110
+```
 
-        // Quartiles
-        double q1 = GetPercentile(data, 25);
-        double q2 = GetPercentile(data, 50);
-        double q3 = GetPercentile(data, 75);
+> **n = 25**
 
-        // Range
-        double range = data.Max() - data.Min();
+---
 
-        // Interquartile Range
-        double iqr = q3 - q1;
+## 🔢 Part 1 — Statistical Measures (`Program1_Statistics.cs`)
 
-        // Sum of Deviations
-        double sumDev = data.Sum(x => (x - mean));
+### Description
 
-        // Output
-        Console.WriteLine("Mean = " + mean);
-        Console.WriteLine("Mode = " + mode);
-        Console.WriteLine("Median = " + median);
-        Console.WriteLine("Variance = " + variance);
-        Console.WriteLine("Standard Deviation = " + stdDev);
-        Console.WriteLine("P20 = " + p20);
-        Console.WriteLine("P50 = " + p50);
-        Console.WriteLine("Q1 = " + q1);
-        Console.WriteLine("Q2 = " + q2);
-        Console.WriteLine("Q3 = " + q3);
-        Console.WriteLine("Range = " + range);
-        Console.WriteLine("Interquartile Range = " + iqr);
-        Console.WriteLine("Sum of Deviations = " + sumDev);
-    }
+A C# program that reads the dataset and computes the following 13 statistical measures:
 
-    static double GetPercentile(double[] sortedData, double percentile)
-    {
-        double position = (sortedData.Length + 1) * percentile / 100.0;
-        int index = (int)position;
-        double fraction = position - index;
+| #      | Statistic                          | Description                             |
+| ------ | ---------------------------------- | --------------------------------------- |
+| (i)    | **Mean**                           | Average of all values (Σxᵢ / n)         |
+| (ii)   | **Mode**                           | Most frequently occurring value(s)      |
+| (iii)  | **Median**                         | Middle value of sorted data             |
+| (iv)   | **Variance**                       | Population variance σ² = Σ(xᵢ − x̄)² / n |
+| (v)    | **P20**                            | 20th Percentile                         |
+| (vi)   | **P50**                            | 50th Percentile                         |
+| (vii)  | **Third Quartile (first mention)** | Q3 = P75                                |
+| (viii) | **Second Quartile**                | Q2 = Median = P50                       |
+| (ix)   | **Third Quartile**                 | Q3 = P75                                |
+| (x)    | **Range**                          | Max − Min                               |
+| (xi)   | **Interquartile Range (IQR)**      | Q3 − Q1                                 |
+| (xii)  | **Standard Deviation**             | σ = √Variance                           |
+| (xiii) | **Summation of Divisions**         | Σ(xᵢ / n)                               |
 
-        if (index <= 0) return sortedData[0];
-        if (index >= sortedData.Length) return sortedData[sortedData.Length - 1];
+### Key Methods Used
 
-        return sortedData[index - 1] + fraction * (sortedData[index] - sortedData[index - 1]);
-    }
-}
+```csharp
+CalculateMean(double[] data)
+CalculateMode(double[] data)
+CalculateMedian(double[] sorted)
+CalculateVariance(double[] data, double mean)
+CalculatePercentile(double[] sorted, double percentile)   // Interpolation method
+CalculateRange(double[] sorted)
+```
+
+### Sample Output
+
+```
+===========================================
+   Probability & Statistical Distributions
+         Programming Assignment - Part 1
+===========================================
+
+Dataset (25 values):
+115, 182, 191, 31, 196, 1099, 5, 172, 10, 179, ...
+
+(i)   Mean                  = 172.6800
+(ii)  Mode                  = 21
+(iii) Median                = 172.0000
+(iv)  Variance              = 36772.8576
+(v)   P20                   = 21.0000
+(vi)  P50                   = 172.0000
+(vii) Third Quartile (Q3)   = 191.0000
+(viii)Second Quartile (Q2)  = 172.0000
+(ix)  Third Quartile (Q3)   = 191.0000
+(x)   Range                 = 1094.0000
+(xi)  Interquartile Range   = 133.0000
+(xii) Standard Deviation    = 191.7679
+(xiii)Summation of Divisions = 172.6800
+```
+
+---
+
+## 🚨 Part 2 — Outlier Detection (`Program2_OutlierDetection.cs`)
+
+### Description
+
+A C# program that checks whether each value in the dataset is an **outlier** or not, using two standard statistical methods.
+
+### Methods
+
+#### ① IQR Method (Tukey's Fences)
+
+A value is considered an **outlier** if it falls outside the fences:
+
+```
+Lower Fence = Q1 − 1.5 × IQR
+Upper Fence = Q3 + 1.5 × IQR
+```
+
+#### ② Z-Score Method
+
+A value is considered an **outlier** if:
+
+```
+|Z| > 3     where Z = (x − mean) / stdDev
+```
+
+### Sample Output
+
+```
+===========================================
+        OUTLIER CHECK FOR EACH VALUE
+===========================================
+#     Value      IQR Outlier     Z-Score      Z Outlier
+-------------------------------------------------------
+1     115        No              -0.3002       No
+2     182        No               0.0484       No
+...
+6     1099       YES ⚠️           4.8289        YES ⚠️
+...
+
+SUMMARY
+[IQR Method]    Outliers found (1): → 1099
+[Z-Score Method] Outliers found (1): → 1099  (Z = 4.8289)
+```
+
+> ⚠️ The value **1099** is clearly an outlier in both methods.
+
+---
+
+## ▶️ How to Run
+
+### Requirements
+
+- [.NET SDK](https://dotnet.microsoft.com/download) (version .10 or later)
+- Any C# IDE: **Visual Studio**, **Visual Studio Code**, or **Rider**
+
+### Steps
+
+```bash
+dotnet run Program1_Statistics.cs
+dotnet run Program2_OutlierDetection.cs
+
+```
+
+---
+
+## 🧠 Concepts Used
+
+- Descriptive Statistics (Mean, Mode, Median, Variance, Std Dev)
+- Percentiles & Quartiles (Interpolation Method)
+- Outlier Detection (IQR / Z-Score)
+- C# LINQ for data manipulation (`GroupBy`, `Sum`, `Average`, `OrderBy`)
+- Array sorting and indexing
+
+---
